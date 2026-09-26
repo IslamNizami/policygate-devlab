@@ -8,6 +8,7 @@ import com.islamnizami.policygatedevlab.repository.RoleRepository;
 import com.islamnizami.policygatedevlab.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -16,8 +17,10 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
+    private final AuditLogService auditLogService;
 
     @Transactional
+    @CacheEvict(value = "user_security_details",key = "#username")
     public void assignRoleToUser(String username, String roleName){
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found: " + username));
@@ -27,6 +30,9 @@ public class UserService {
 
         user.getRoles().add(role);
         userRepository.save(user);
+
+        auditLogService.logAction("ASSIGN_ROLE_" + roleName,"USER_"+username);
+
     }
 
 }

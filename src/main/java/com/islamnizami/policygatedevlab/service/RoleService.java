@@ -9,6 +9,8 @@ import com.islamnizami.policygatedevlab.repository.PermissionRepository;
 import com.islamnizami.policygatedevlab.repository.RoleRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -19,8 +21,10 @@ public class RoleService {
 
     private final RoleRepository roleRepository;
     private final PermissionRepository permissionRepository;
+    private final AuditLogService auditLogService;
 
     @Transactional
+    @CacheEvict(value = "all_roles",allEntries = true)
     public Role createRole(String name) {
         String formattedName = formatRoleName(name);
 
@@ -34,11 +38,13 @@ public class RoleService {
         return roleRepository.save(role);
     }
 
+    @Cacheable(value = "all_roles")
     public List<Role> getAllRoles() {
         return roleRepository.findAll();
     }
 
     @Transactional
+    @CacheEvict(value = "user_security_details", allEntries = true)
     public void assignPermissionToRole(String roleName, String permissionName) {
         Role role = roleRepository.findByName(roleName)
                 .orElseThrow(() -> new ResourceNotFoundException("Role not found: " + roleName));
@@ -48,6 +54,8 @@ public class RoleService {
 
         role.getPermissions().add(permission);
         roleRepository.save(role);
+
+        auditLogService.logAction("ASSIGN_PERMISSION_" + permissionName,"ROLE_" + roleName);
     }
 
     @Transactional

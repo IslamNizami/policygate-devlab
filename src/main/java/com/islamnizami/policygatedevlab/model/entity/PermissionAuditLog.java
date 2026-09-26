@@ -6,19 +6,22 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.io.Serializable;
+import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "permissions")
+@Table(name = "permission_audit_logs")
 @Getter
 @Setter
 @NoArgsConstructor
-public class Permission implements Serializable {
+public class PermissionAuditLog {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true,nullable = false)
-    private String name;
+    private String performedBy;
+    private String action;
+    private String targetEntity;
+    private LocalDateTime createdAt = LocalDateTime.now();
+
 }

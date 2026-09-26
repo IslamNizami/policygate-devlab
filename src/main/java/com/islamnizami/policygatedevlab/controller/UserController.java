@@ -12,6 +12,7 @@ public class UserController {
 
     private final UserService userService;
 
+
     @PostMapping("/{username}/roles/{roleName}")
     @PreAuthorize("hasAuthority('USER_ASSIGN')")
     public String assignRoleToUser(@PathVariable String username, @PathVariable String roleName) {
