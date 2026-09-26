@@ -1,0 +1,32 @@
+package com.islamnizami.policygatedevlab.service;
+
+
+import com.islamnizami.policygatedevlab.model.entity.Role;
+import com.islamnizami.policygatedevlab.model.entity.User;
+import com.islamnizami.policygatedevlab.repository.PermissionRepository;
+import com.islamnizami.policygatedevlab.repository.RoleRepository;
+import com.islamnizami.policygatedevlab.repository.UserRepository;
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+
+@Service
+@RequiredArgsConstructor
+public class UserService {
+
+    private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
+
+    @Transactional
+    public void assignRoleToUser(String username, String roleName){
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found: " + username));
+
+        Role role = roleRepository.findByName(roleName)
+                .orElseThrow(() -> new RuntimeException("Role not found: " + roleName));
+
+        user.getRoles().add(role);
+        userRepository.save(user);
+    }
+
+}
