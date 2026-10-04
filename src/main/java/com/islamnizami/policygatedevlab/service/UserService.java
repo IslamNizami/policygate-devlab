@@ -1,6 +1,9 @@
 package com.islamnizami.policygatedevlab.service;
 
 
+import com.islamnizami.policygatedevlab.exception.GlobalExceptionHandler;
+import com.islamnizami.policygatedevlab.exception.ResourceAlreadyExistsException;
+import com.islamnizami.policygatedevlab.exception.ResourceNotFoundException;
 import com.islamnizami.policygatedevlab.model.entity.Role;
 import com.islamnizami.policygatedevlab.model.entity.User;
 import com.islamnizami.policygatedevlab.repository.PermissionRepository;
@@ -23,10 +26,10 @@ public class UserService {
     @CacheEvict(value = "user_security_details",key = "#username")
     public void assignRoleToUser(String username, String roleName){
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User not found: " + username));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found: " + username));
 
         Role role = roleRepository.findByName(roleName)
-                .orElseThrow(() -> new RuntimeException("Role not found: " + roleName));
+                .orElseThrow(() -> new ResourceAlreadyExistsException("Role not found: " + roleName));
 
         user.getRoles().add(role);
         userRepository.save(user);
